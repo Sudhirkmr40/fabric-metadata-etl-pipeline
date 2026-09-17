@@ -1,0 +1,126 @@
+{
+    "name": "PL3_CLOUDSG_CSV_EXCEL",
+    "objectId": "4e30931a-0e98-436e-80d0-9a5e94a56dd6",
+    "properties": {
+        "activities": [
+            {
+                "name": "LKUP_L3_TYPE",
+                "type": "Lookup",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "typeProperties": {
+                    "source": {
+                        "type": "DataWarehouseSource",
+                        "sqlReaderQuery": {
+                            "value": "SELECT DISTINCT L3_switch_type \nFROM WH_BATCH11_METADATA.dbo.vb_tbl_job a\nJOIN WH_BATCH11_METADATA.dbo.vb_tbl_trigger b ON a.trigger_id = b.trigger_id\nWHERE b.trigger_name = '@{pipeline().parameters.Trigger_Name}'",
+                            "type": "Expression"
+                        },
+                        "queryTimeout": "02:00:00",
+                        "partitionOption": "None"
+                    },
+                    "datasetSettings": {
+                        "annotations": [],
+                        "linkedService": {
+                            "name": "WH_BATCH11_METADATA",
+                            "properties": {
+                                "annotations": [],
+                                "type": "DataWarehouse",
+                                "typeProperties": {
+                                    "endpoint": "n2rxkky624fe5jza6ostdqs7v4-5zuevpksmfvenc76o3ayn76y4a.datawarehouse.fabric.microsoft.com",
+                                    "artifactId": "1937b0aa-229f-4602-a903-982290ae9c03",
+                                    "workspaceId": "bd4a68ee-6152-466a-8bfe-76c186ffd8e0"
+                                }
+                            }
+                        },
+                        "type": "DataWarehouseTable",
+                        "schema": []
+                    }
+                }
+            },
+            {
+                "name": "Switch_SRC_LOC_CSV_EXCEL",
+                "type": "Switch",
+                "dependsOn": [
+                    {
+                        "activity": "LKUP_L3_TYPE",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "typeProperties": {
+                    "on": {
+                        "value": "@activity('LKUP_L3_TYPE').output.firstRow.L3_switch_type",
+                        "type": "Expression"
+                    },
+                    "cases": [
+                        {
+                            "value": "Azure",
+                            "activities": [
+                                {
+                                    "name": "Invoke pipeline1",
+                                    "type": "InvokePipeline",
+                                    "dependsOn": [],
+                                    "policy": {
+                                        "timeout": "0.12:00:00",
+                                        "retry": 0,
+                                        "retryIntervalInSeconds": 30,
+                                        "secureOutput": false,
+                                        "secureInput": false
+                                    },
+                                    "typeProperties": {
+                                        "waitOnCompletion": true,
+                                        "operationType": "InvokeFabricPipeline",
+                                        "pipelineId": "581a94e2-ac82-4ebb-af8c-95d2760ef734",
+                                        "workspaceId": "bd4a68ee-6152-466a-8bfe-76c186ffd8e0",
+                                        "parameters": {
+                                            "Trigger_Name": {
+                                                "value": "@pipeline().parameters.Trigger_Name",
+                                                "type": "Expression"
+                                            }
+                                        }
+                                    },
+                                    "externalReferences": {
+                                        "connection": "7f1b4e71-fdcb-4366-8ce2-100fbb1c88f0"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "value": "AWS",
+                            "activities": [
+                                {
+                                    "name": "Wait1",
+                                    "type": "Wait",
+                                    "dependsOn": [],
+                                    "typeProperties": {
+                                        "waitTimeInSeconds": 1
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "defaultActivities": []
+                }
+            }
+        ],
+        "parameters": {
+            "Trigger_Name": {
+                "type": "string"
+            }
+        },
+        "variables": {
+            "var_L3_type": {
+                "type": "String"
+            }
+        },
+        "lastModifiedByObjectId": "93bfe8c4-4b0e-46ed-9798-bea1fc53aecd",
+        "lastPublishTime": "2026-09-17T17:25:24Z"
+    }
+}

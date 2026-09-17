@@ -1,0 +1,70 @@
+{
+    "name": "PL1_MASTER",
+    "objectId": "8f51e614-b274-4bf9-96e4-9171206fcedd",
+    "properties": {
+        "activities": [
+            {
+                "name": "SET_VAR_TRIGGER",
+                "type": "SetVariable",
+                "dependsOn": [],
+                "policy": {
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "typeProperties": {
+                    "variableName": "var_trigger_name",
+                    "value": {
+                        "value": "@pipeline().parameters.Trigger_Name",
+                        "type": "Expression"
+                    }
+                }
+            },
+            {
+                "name": "EXEC_RAW_DATA",
+                "type": "InvokePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "SET_VAR_TRIGGER",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "typeProperties": {
+                    "waitOnCompletion": true,
+                    "operationType": "InvokeFabricPipeline",
+                    "pipelineId": "8d0454eb-90d3-4b30-bac0-97c48418526a",
+                    "workspaceId": "bd4a68ee-6152-466a-8bfe-76c186ffd8e0",
+                    "parameters": {
+                        "Trigger_Name": {
+                            "value": "@variables('var_trigger_name')",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "externalReferences": {
+                    "connection": "7f1b4e71-fdcb-4366-8ce2-100fbb1c88f0"
+                }
+            }
+        ],
+        "parameters": {
+            "Trigger_Name": {
+                "type": "string"
+            }
+        },
+        "variables": {
+            "var_trigger_name": {
+                "type": "String"
+            }
+        },
+        "lastModifiedByObjectId": "93bfe8c4-4b0e-46ed-9798-bea1fc53aecd",
+        "lastPublishTime": "2026-09-17T17:32:54Z"
+    }
+}
